@@ -113,6 +113,11 @@ class Guacamole(requests.Session):
                 return k, v
         raise KeyError(conname)
 
+    def user_list(self):
+        res = self.get(self.endpoints.user)
+        res.raise_for_status()
+        return res.json().values()
+
     def user_grant_connection(self, username, conname):
         cid, _ = self.connection_find(conname)
         patch = [
