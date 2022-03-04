@@ -99,6 +99,10 @@ def add_user(
                 hostname=f"{slug}-vm-int",
                 username="fedora",
                 password=password,
+                enable_drive="true",
+                create_drive_path="true",
+                drive_path=f"/shared/{slug}",
+                drive_name="Shared",
             ),
         )
         api.connection_add(c.dict(by_alias=True))

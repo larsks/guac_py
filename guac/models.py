@@ -12,18 +12,22 @@ class RDPConnectionParameters(ConnectionParameters):
         alias_generator = lambda x: x.replace("_", "-")
         allow_population_by_field_name = True
 
-    port: str = ""
+    create_drive_path: str = ""
     dest_port: str = ""
-    ignore_cert: str = "true"
-    gateway_port: str = ""
-    hostname: str = ""
-    username: str = ""
-    password: str = ""
     domain: str = ""
-    gateway_hostname: str = ""
-    gateway_username: str = ""
-    gateway_password: str = ""
+    drive_name: str = ""
+    drive_path: str = ""
+    enable_drive: str = ""
     gateway_domain: str = ""
+    gateway_hostname: str = ""
+    gateway_password: str = ""
+    gateway_port: str = ""
+    gateway_username: str = ""
+    hostname: str = ""
+    ignore_cert: str = "true"
+    password: str = ""
+    port: str = ""
+    username: str = ""
 
 
 class SSHConnectionParameters(ConnectionParameters):
