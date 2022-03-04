@@ -15,15 +15,15 @@ LOG = logging.getLogger(__name__)
 
 @click.group(context_settings={"auto_envvar_prefix": "GUAC"})
 @click.option("-v", "--verbose", count=True)
-@click.option("--endpoint")
+@click.option("--baseurl")
 @click.option("--username", default="guacadmin")
 @click.option("--password")
 @click.pass_context
-def main(ctx, verbose, endpoint, username, password):
+def main(ctx, verbose, baseurl, username, password):
     loglevel = ["WARNING", "INFO", "DEBUG"][min(verbose, 2)]
     logging.basicConfig(level=loglevel)
 
-    g = guac.api.Guacamole(endpoint, username=username, password=password)
+    g = guac.api.Guacamole(baseurl, username=username, password=password)
     ctx.obj = g
 
 
