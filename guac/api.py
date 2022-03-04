@@ -2,6 +2,7 @@ import logging
 import random
 import requests
 import string
+import urllib.parse
 
 from . import models
 
@@ -40,7 +41,7 @@ class Guacamole(requests.Session):
 
     def __init__(
         self,
-        endpoint,
+        baseurl,
         token=None,
         username=None,
         password=None,
@@ -48,7 +49,7 @@ class Guacamole(requests.Session):
     ):
         super().__init__()
 
-        self.baseurl = endpoint
+        self.baseurl = baseurl
         self.endpoints = Endpoints(datasource)
         self.username = username if username else default_username
         self.password = password
@@ -78,7 +79,7 @@ class Guacamole(requests.Session):
 
     def request(self, method, url, *args, **kwargs):
         if not url.startswith("http"):
-            url = f"{self.baseurl}{url}"
+            url = urllib.parse.urljoin(self.baseurl, url)
 
         LOG.debug("url = %s", url)
         return super().request(method, url, *args, **kwargs)
@@ -126,7 +127,11 @@ class Guacamole(requests.Session):
 
     def user_delete(self, username):
         res = self.delete(f"{self.endpoints.user}/{username}")
-        res.raise_for_status()
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as err:
+            if err.response.status_code != 404:
+                raise
 
     def user_add(self, username, password=None, fullname=None):
         # If caller does not provide a password, set it to a long
