@@ -1,22 +1,14 @@
 import logging
-import random
 import requests
-import string
 import urllib.parse
 
-from . import models
+import guac.models
+import guac.utils
 
 default_username = "guacadmin"
 
 
 LOG = logging.getLogger(__name__)
-
-
-def random_string(stringlen: int):
-    return "".join(
-        random.choice(string.ascii_letters + string.digits + string.punctuation)
-        for i in range(stringlen)
-    )
 
 
 class Endpoints:
@@ -143,9 +135,9 @@ class Guacamole(requests.Session):
         # random string. Creating a user with no password will allow
         # password-free login.
         if password is None:
-            password = random_string(60)
+            password = guac.utils.random_string(60)
 
-        u = models.User(username=username, password=password)
+        u = guac.models.User(username=username, password=password)
         if fullname:
             u.attributes.guac_full_name = fullname
 
