@@ -3,7 +3,11 @@ import pydantic
 from typing import Optional
 
 
-class ConnectionParameters(pydantic.BaseModel):
+class Base(pydantic.BaseModel):
+    pass
+
+
+class ConnectionParameters(Base):
     pass
 
 
@@ -48,7 +52,7 @@ class SSHConnectionParameters(ConnectionParameters):
     command: str = ""
 
 
-class ConnectionAttributes(pydantic.BaseModel):
+class ConnectionAttributes(Base):
     max_connections: str = ""
     max_connections_per_user: str = ""
     weight: str = ""
@@ -57,7 +61,7 @@ class ConnectionAttributes(pydantic.BaseModel):
     guacd_encryption: str = ""
 
 
-class Connection(pydantic.BaseModel):
+class Connection(Base):
     parentIdentifier: str = "ROOT"
     name: str
     protocol: str
@@ -69,7 +73,7 @@ class Connection(pydantic.BaseModel):
     )
 
 
-class UserAttributes(pydantic.BaseModel):
+class UserAttributes(Base):
     disabled: str = ""
     expired: str = ""
     access_window_start: str = ""
@@ -82,7 +86,16 @@ class UserAttributes(pydantic.BaseModel):
     guac_organizational_role: str = ""
 
 
-class User(pydantic.BaseModel):
+class User(Base):
     username: str = ""
     password: str = ""
     attributes: UserAttributes = pydantic.Field(default_factory=UserAttributes)
+
+
+class GroupAttributes(Base):
+    disabled: str = ""
+
+
+class Group(Base):
+    identifier: str = ""
+    attributes: GroupAttributes = pydantic.Field(default_factory=GroupAttributes)

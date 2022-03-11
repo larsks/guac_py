@@ -27,6 +27,10 @@ class Endpoints:
     def connection(self):
         return f"{self.base}/connections"
 
+    @property
+    def group(self):
+        return f"{self.base}/userGroups"
+
 
 class Guacamole(requests.Session):
     token: str
@@ -145,3 +149,47 @@ class Guacamole(requests.Session):
         res.raise_for_status()
 
         return res.status_code == 200, res.json()
+
+    def group_add(self, groupname):
+        g = guac.models.Group(identifier=groupname)
+        breakpoint()
+        res = self.post(self.endpoints.group, json=g.dict(by_alias=True))
+        res.raise_for_status()
+
+        return res.status_code == 200, res.json()
+
+    def group_list(self):
+        res = self.get(self.endpoints.group)
+        res.raise_for_status()
+        return res.json().values()
+
+    def group_delete(self, groupname):
+        res = self.delete(f"{self.endpoints.group}/{groupname}")
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as err:
+            if err.response.status_code != 404:
+                raise
+
+    def group_set_permissions(self, groupname, add=None, remove=None):
+        if not add and not remove:
+            return True, {}
+
+        changes = []
+
+        for perm in add:
+            changes.append(
+                {"op": "add", "path": "/systemPermissions", "value": perm.upper()},
+            )
+        for perm in remove:
+            changes.append(
+                {"op": "remove", "path": "/systemPermissions", "value": perm.upper()},
+            )
+
+        LOG.debug("setting permissions for group %s to: %s", groupname, changes)
+        res = self.patch(
+            f"{self.endpoints.group}/{groupname}/permissions", json=changes
+        )
+        res.raise_for_status()
+
+        return res.status_code == 200, {}
