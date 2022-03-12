@@ -185,6 +185,11 @@ class Guacamole(requests.Session):
         res.raise_for_status()
         return guac.models.User(**res.json())
 
+    def user_get_permissions(self, username):
+        res = self.get(f"{self.endpoints.user}/{username}/permissions")
+        res.raise_for_status()
+        return guac.models.UserPermissions(**res.json())
+
     def group_add(self, groupname):
         g = guac.models.Group(identifier=groupname)
         res = self.post(self.endpoints.group, json=g.dict(by_alias=True))

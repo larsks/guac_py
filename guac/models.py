@@ -1,6 +1,20 @@
+import enum
 import pydantic
 
 from typing import Optional
+
+
+class SystemPermissionsEnum(str, enum.Enum):
+    ADMINISTER = "ADMINISTER"
+    CREATE_CONNECTION = "CREATE_CONNECTION"
+    CREATE_CONNECTION_GROUP = "CREATE_CONNECTION_GROUP"
+    CREATE_SHARING_PROFILE = "CREATE_SHARING_PROFILE"
+    CREATE_USER = "CREATE_USER"
+    CREATE_USER_GROUP = "CREATE_USER_GROUP"
+
+
+class PermissionsEnum(str, enum.Enum):
+    READ = "READ"
 
 
 class Base(pydantic.BaseModel):
@@ -75,36 +89,41 @@ class Connection(Base):
 
 
 class UserAttributes(Base):
-    disabled: str = ""
-    expired: str = ""
-    access_window_start: str = ""
-    access_window_end: str = ""
-    valid_from: str = ""
-    valid_until: str = ""
-    timezone: Optional[str] = None
-    guac_full_name: str = ""
-    guac_organization: str = ""
-    guac_organizational_role: str = ""
+    disabled: str | None = ""
+    expired: str | None = ""
+    access_window_start: str | None = ""
+    access_window_end: str | None = ""
+    valid_from: str | None = ""
+    valid_until: str | None = ""
+    timezone: str | None = None
+    guac_full_name: str | None = ""
+    guac_organization: str | None = ""
+    guac_organizational_role: str | None = ""
+
+
+class GroupPermissions(Base):
+    connectionPermissions: dict[str, list[PermissionsEnum]]
+    connectionGroupPermissions: dict[str, str]
+    sharingProfilePermissions: dict[str, str]
+    activeConnectionPermissions: dict[str, str]
+    userPermissions: dict[str, list[PermissionsEnum]]
+    userGroupPermissions: dict[str, str]
+    systemPermissions: list[SystemPermissionsEnum]
+
+
+class UserPermissions(GroupPermissions):
+    pass
 
 
 class User(Base):
     username: str = ""
     password: str = ""
     attributes: UserAttributes = pydantic.Field(default_factory=UserAttributes)
+    permissions: UserPermissions | None
 
 
 class GroupAttributes(Base):
     disabled: str | None = ""
-
-
-class GroupPermissions(Base):
-    connectionPermissions: dict[str, list[str]]
-    connectionGroupPermissions: dict[str, str]
-    sharingProfilePermissions: dict[str, str]
-    activeConnectionPermissions: dict[str, str]
-    userPermissions: dict[str, str]
-    userGroupPermissions: dict[str, str]
-    systemPermissions: list[str]
 
 
 class Group(Base):
