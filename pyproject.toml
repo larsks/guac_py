@@ -8,6 +8,12 @@ authors = [{name = "Lars Kellogg-Stedman", email = "lars@redhat.com"}]
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 dynamic = ["version", "description"]
+dependencies = [
+    "requests",
+    "pydantic",
+    "python-dotenv",
+    "click",
+]
 
 [project.urls]
 Home = "https://github.com/larsks/guac"
