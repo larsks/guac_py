@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--remove-perm", multiple=True)
 @click.argument("groupname")
 @click.pass_obj
-def set_group_permissions(
+def permissions(
     api,
     admin,
     add_perm,

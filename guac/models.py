@@ -53,15 +53,16 @@ class SSHConnectionParameters(ConnectionParameters):
 
 
 class ConnectionAttributes(Base):
-    max_connections: str = ""
-    max_connections_per_user: str = ""
-    weight: str = ""
-    failover_only: str = ""
-    guacd_port: str = ""
-    guacd_encryption: str = ""
+    max_connections: str | None = ""
+    max_connections_per_user: str | None = ""
+    weight: str | None = ""
+    failover_only: str | None = ""
+    guacd_port: str | None = ""
+    guacd_encryption: str | None = ""
 
 
 class Connection(Base):
+    id: str | None
     parentIdentifier: str = "ROOT"
     name: str
     protocol: str
@@ -93,9 +94,20 @@ class User(Base):
 
 
 class GroupAttributes(Base):
-    disabled: str = ""
+    disabled: str | None = ""
+
+
+class GroupPermissions(Base):
+    connectionPermissions: dict[str, list[str]]
+    connectionGroupPermissions: dict[str, str]
+    sharingProfilePermissions: dict[str, str]
+    activeConnectionPermissions: dict[str, str]
+    userPermissions: dict[str, str]
+    userGroupPermissions: dict[str, str]
+    systemPermissions: list[str]
 
 
 class Group(Base):
     identifier: str = ""
     attributes: GroupAttributes = pydantic.Field(default_factory=GroupAttributes)
+    permissions: GroupPermissions | None

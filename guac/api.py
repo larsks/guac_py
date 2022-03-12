@@ -83,41 +83,40 @@ class Guacamole(requests.Session):
     def connection_list(self):
         res = self.get(self.endpoints.connection)
         res.raise_for_status()
-        return res.json()
+        return [guac.models.Connection(id=k, **v) for k, v in res.json().items()]
 
-    def connection_exists(self, conname):
-        return any(
-            connection["name"] == conname
-            for connection in self.connection_list().values()
-        )
+    def connection_exists(self, cname):
+        return any(conn.name == cname for conn in self.connection_list())
 
-    def connection_delete(self, conname):
+    def connection_delete(self, cname):
         try:
-            cid, config = self.connection_find(conname)
-            res = self.delete(f"{self.endpoints.connection}/{cid}")
+            conn = self.connection_find(cname)
+            res = self.delete(f"{self.endpoints.connection}/{conn.id}")
             res.raise_for_status()
         except KeyError:
             pass
 
     def connection_add(self, connection):
         res = self.post(self.endpoints.connection, json=connection)
-        return res.status_code == 200, res.json()
+        return guac.models.Connection(**res.json())
 
-    def connection_find(self, conname):
-        for k, v in self.connection_list().items():
-            if v["name"] == conname:
-                return k, v
-        raise KeyError(conname)
+    def connection_find(self, cname):
+        LOG.debug("looking for connection name=%s", cname)
+        for conn in self.connection_list():
+            if conn.name == cname:
+                LOG.debug("found connection name=%s, id=%s", conn.name, conn.id)
+                return conn
+        raise KeyError(cname)
 
     def user_list(self):
         res = self.get(self.endpoints.user)
         res.raise_for_status()
         return res.json().values()
 
-    def user_grant_connection(self, username, conname):
-        cid, _ = self.connection_find(conname)
+    def user_grant_connection(self, username, cname):
+        conn = self.connection_find(cname)
         patch = [
-            {"op": "add", "path": f"/connectionPermissions/{cid}", "value": "READ"}
+            {"op": "add", "path": f"/connectionPermissions/{conn.id}", "value": "READ"}
         ]
         res = self.patch(f"{self.endpoints.user}/{username}/permissions", json=patch)
         res.raise_for_status()
@@ -148,32 +147,21 @@ class Guacamole(requests.Session):
         res = self.post(self.endpoints.user, json=u.dict(by_alias=True))
         res.raise_for_status()
 
-        return res.status_code == 200, res.json()
+        return guac.models.User(**res.json())
 
-    def group_add(self, groupname):
-        g = guac.models.Group(identifier=groupname)
-        breakpoint()
-        res = self.post(self.endpoints.group, json=g.dict(by_alias=True))
+    def group_get(self, groupname):
+        res = self.get(f"{self.endpoints.group}/{groupname}")
         res.raise_for_status()
+        return guac.models.Group(**res.json())
 
-        return res.status_code == 200, res.json()
-
-    def group_list(self):
-        res = self.get(self.endpoints.group)
+    def group_get_permissions(self, groupname):
+        res = self.get(f"{self.endpoints.group}/{groupname}/permissions")
         res.raise_for_status()
-        return res.json().values()
-
-    def group_delete(self, groupname):
-        res = self.delete(f"{self.endpoints.group}/{groupname}")
-        try:
-            res.raise_for_status()
-        except requests.HTTPError as err:
-            if err.response.status_code != 404:
-                raise
+        return guac.models.GroupPermissions(**res.json())
 
     def group_set_permissions(self, groupname, add=None, remove=None):
         if not add and not remove:
-            return True, {}
+            return
 
         changes = []
 
@@ -192,4 +180,54 @@ class Guacamole(requests.Session):
         )
         res.raise_for_status()
 
-        return res.status_code == 200, {}
+    def user_get(self, username):
+        res = self.get(f"{self.endpoints.user}/{username}")
+        res.raise_for_status()
+        return guac.models.User(**res.json())
+
+    def group_add(self, groupname):
+        g = guac.models.Group(identifier=groupname)
+        res = self.post(self.endpoints.group, json=g.dict(by_alias=True))
+        res.raise_for_status()
+        return guac.models.Group(**res.json())
+
+    def group_list(self):
+        res = self.get(self.endpoints.group)
+        res.raise_for_status()
+        return [guac.models.Group(**grp) for grp in res.json().values()]
+
+    def group_delete(self, groupname):
+        res = self.delete(f"{self.endpoints.group}/{groupname}")
+        try:
+            res.raise_for_status()
+        except requests.HTTPError as err:
+            if err.response.status_code != 404:
+                raise
+
+    def group_add_connection(self, groupname, cname):
+        conn = self.connection_find(cname)
+        changes = [
+            {
+                "op": "add",
+                "path": f"/connectionPermissions/{conn.id}",
+                "value": "READ",
+            }
+        ]
+        res = self.patch(
+            f"{self.endpoints.group}/{groupname}/permissions", json=changes
+        )
+        res.raise_for_status()
+
+    def group_remove_connection(self, groupname, cname):
+        conn = self.connection_find(cname)
+        changes = [
+            {
+                "op": "remove",
+                "path": f"/connectionPermissions/{conn.id}",
+                "value": "READ",
+            }
+        ]
+        res = self.patch(
+            f"{self.endpoints.group}/{groupname}/permissions", json=changes
+        )
+        res.raise_for_status()

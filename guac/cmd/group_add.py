@@ -7,7 +7,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--admin", "-a", is_flag=True)
 @click.argument("groupname")
 @click.pass_obj
-def add_group(
+def add(
     api,
     admin,
     groupname,

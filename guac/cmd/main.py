@@ -5,14 +5,10 @@ import logging
 import guac.api
 import guac.models
 
-import guac.cmd.add_group
-import guac.cmd.add_user
-import guac.cmd.delete_group
-import guac.cmd.delete_user
-import guac.cmd.list_connections
-import guac.cmd.list_groups
-import guac.cmd.list_users
-import guac.cmd.set_group_permissions
+import guac.cmd.user as cmd_user
+import guac.cmd.group as cmd_group
+import guac.cmd.connection as cmd_connection
+import guac.cmd.shell as cmd_shell
 
 dotenv.load_dotenv()
 
@@ -33,14 +29,25 @@ def main(ctx, verbose, baseurl, username, password):
     ctx.obj = g
 
 
-main.command()(guac.cmd.add_group.add_group)
-main.command()(guac.cmd.add_user.add_user)
-main.command()(guac.cmd.delete_group.delete_group)
-main.command()(guac.cmd.delete_user.delete_user)
-main.command()(guac.cmd.list_connections.list_connections)
-main.command()(guac.cmd.list_groups.list_groups)
-main.command()(guac.cmd.list_users.list_users)
-main.command()(guac.cmd.set_group_permissions.set_group_permissions)
+@main.group()
+def user():
+    pass
+
+
+@main.group()
+def group():
+    pass
+
+
+@main.group()
+def connection():
+    pass
+
+
+cmd_group.init_commands(group)
+cmd_user.init_commands(user)
+cmd_connection.init_commands(connection)
+cmd_shell.init_commands(main)
 
 if __name__ == "__main__":
     main()
