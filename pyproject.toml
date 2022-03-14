@@ -13,6 +13,8 @@ dependencies = [
     "pydantic",
     "python-dotenv",
     "click",
+    "jinja2",
+    "PyYAML",
 ]
 
 [project.urls]
