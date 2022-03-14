@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "userdata-{{ NAME }}"
+stringData:
+  userdata: |
+    #cloud-config
+    user: fedora
+    password: "{{ CLOUD_USER_PASSWORD }}"
+    chpasswd:
+      expire: false
+    ssh_authorized_keys:
+      - "{{ SSH_PUBLIC_KEY }}"
+
+type: Opaque

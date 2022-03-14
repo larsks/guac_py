@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ NAME }}-vm-int"
+  labels:
+    kubevirt.io/domain: "{{ NAME }}"
+spec:
+  ports:
+    - name: ssh
+      port: 22
+    - name: http
+      port: 80
+    - name: https
+      port: 443
+    - name: rdp
+      port: 3389
+  selector:
+    kubevirt.io/domain: "{{ NAME }}"

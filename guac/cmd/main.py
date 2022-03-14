@@ -9,6 +9,7 @@ import guac.cmd.user as cmd_user
 import guac.cmd.group as cmd_group
 import guac.cmd.connection as cmd_connection
 import guac.cmd.shell as cmd_shell
+import guac.cmd.vm as cmd_vm
 
 dotenv.load_dotenv()
 
@@ -44,10 +45,16 @@ def connection():
     pass
 
 
+@main.group()
+def vm():
+    pass
+
+
 cmd_group.init_commands(group)
 cmd_user.init_commands(user)
 cmd_connection.init_commands(connection)
 cmd_shell.init_commands(main)
+cmd_vm.init_commands(vm)
 
 if __name__ == "__main__":
     main()
