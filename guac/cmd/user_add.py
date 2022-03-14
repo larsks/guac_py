@@ -1,60 +1,11 @@
 import click
 import logging
 import os
-import subprocess
 
 import guac.models
 import guac.utils
 
 LOG = logging.getLogger(__name__)
-
-
-def generate_password(username, password_file, recreate=False):
-    if not os.path.exists(password_file) or recreate:
-        LOG.warning("creating password for user %s", username)
-        with open(password_file, "w") as fd:
-            fd.write(guac.utils.random_string(25))
-            fd.write("\n")
-
-    with open(password_file) as fd:
-        password = fd.read().strip()
-
-    return password
-
-
-def generate_keypair(username, sshkey_file, recreate=False):
-    if not os.path.exists(sshkey_file) or recreate:
-        LOG.warning("creating key for user %s", username)
-        try:
-            os.remove(sshkey_file)
-        except FileNotFoundError:
-            pass
-
-        subprocess.run(
-            [
-                "ssh-keygen",
-                "-t",
-                "rsa",
-                "-m",
-                "pem",
-                "-b",
-                "4096",
-                "-N",
-                "",
-                "-f",
-                sshkey_file,
-            ],
-            check=True,
-            capture_output=True,
-        )
-
-    with open(sshkey_file) as fd:
-        ssh_private = fd.read()
-
-    with open(f"{sshkey_file}.pub") as fd:
-        ssh_public = fd.read()
-
-    return ssh_private, ssh_public
 
 
 @click.option("--keydir", "-k", default="keys")
@@ -76,10 +27,12 @@ def add(
     connection_group,
 ):
     password_file = os.path.join(keydir, f"{username}.password")
-    password = generate_password(username, password_file, recreate=recreate_password)
+    password = guac.utils.generate_password(
+        username, password_file, recreate=recreate_password
+    )
 
     sshkey_file = os.path.join(keydir, username)
-    ssh_private, ssh_public = generate_keypair(
+    ssh_private, ssh_public = guac.utils.generate_keypair(
         username, sshkey_file, recreate=recreate_key
     )
 
