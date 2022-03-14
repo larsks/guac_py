@@ -191,7 +191,7 @@ class Guacamole(requests.Session):
         return guac.models.UserPermissions(**res.json())
 
     def group_add(self, groupname):
-        g = guac.models.Group(identifier=groupname)
+        g = guac.models.Group(groupname=groupname)
         res = self.post(self.endpoints.group, json=g.dict(by_alias=True))
         res.raise_for_status()
         return guac.models.Group(**res.json())

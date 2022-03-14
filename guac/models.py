@@ -127,6 +127,9 @@ class GroupAttributes(Base):
 
 
 class Group(Base):
-    identifier: str = ""
+    groupname: str = pydantic.Field(alias="identifier")
     attributes: GroupAttributes = pydantic.Field(default_factory=GroupAttributes)
     permissions: GroupPermissions | None
+
+    class Config:
+        allow_population_by_field_name = True
