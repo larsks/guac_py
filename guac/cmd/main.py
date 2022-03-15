@@ -1,6 +1,7 @@
 import click
 import dotenv
 import logging
+import os
 
 import guac.api
 import guac.models
@@ -11,9 +12,13 @@ import guac.cmd.connection as cmd_connection
 import guac.cmd.shell as cmd_shell
 import guac.cmd.vm as cmd_vm
 
-dotenv.load_dotenv()
-
 LOG = logging.getLogger(__name__)
+GLOBAL_DOTENV = os.path.join(
+    os.getenv("XDG_CONFIG_HOME", os.path.expanduser("~/.config")), "guac.env"
+)
+
+for env in [dotenv.find_dotenv(".env", usecwd=True), GLOBAL_DOTENV]:
+    dotenv.load_dotenv(env)
 
 
 @click.group(context_settings={"auto_envvar_prefix": "GUAC"})
