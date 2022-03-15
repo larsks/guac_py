@@ -4,10 +4,10 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-@click.option("--admin", "-a", is_flag=True)
+@click.option("--admin", is_flag=True)
 @click.option("--connection", "-c")
-@click.option("--add-perm", multiple=True)
-@click.option("--remove-perm", multiple=True)
+@click.option("--add-perm", "-a", multiple=True)
+@click.option("--remove-perm", "-r", multiple=True)
 @click.argument("groupname")
 @click.pass_obj
 def permissions(
