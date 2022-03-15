@@ -159,7 +159,43 @@ class Guacamole(requests.Session):
         res.raise_for_status()
         return guac.models.GroupPermissions(**res.json())
 
-    def group_set_permissions(self, groupname, add=None, remove=None):
+    def group_set_connection_permissions(
+        self, groupname, connection, add=None, remove=None
+    ):
+        if not add and not remove:
+            return
+
+        changes = []
+
+        for perm in add:
+            changes.append(
+                {
+                    "op": "add",
+                    "path": f"/connectionPermissions/{connection}",
+                    "value": perm.upper(),
+                },
+            )
+        for perm in remove:
+            changes.append(
+                {
+                    "op": "remove",
+                    "path": f"/connectionPermissions/{connection}",
+                    "value": perm.upper(),
+                },
+            )
+
+        LOG.debug(
+            "setting connection permissions for group %s connection %s to: %s",
+            groupname,
+            connection,
+            changes,
+        )
+        res = self.patch(
+            f"{self.endpoints.group}/{groupname}/permissions", json=changes
+        )
+        res.raise_for_status()
+
+    def group_set_system_permissions(self, groupname, add=None, remove=None):
         if not add and not remove:
             return
 
