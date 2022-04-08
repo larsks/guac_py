@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--connection-group", "-g")
 @click.argument("username")
 @click.pass_obj
-def add(
+def create(
     api,
     keydir,
     recreate_password,
@@ -39,15 +39,15 @@ def add(
     if not api.user_exists(username) or recreate_user:
         LOG.warning("creating user %s", username)
         api.user_delete(username)
-        if not api.user_add(username):
-            raise click.ClickException(f"failed to add user {username}")
+        if not api.user_create(username):
+            raise click.ClickException(f"failed to create user {username}")
 
     slug = guac.utils.slug_from_name(username)
     ssh_connection_name = f"{slug}-vm-ssh"
     rdp_connection_name = f"{slug}-vm-rdp"
 
     if not api.connection_exists(ssh_connection_name) or recreate_connection:
-        LOG.warning("add ssh connection %s", ssh_connection_name)
+        LOG.warning("create ssh connection %s", ssh_connection_name)
         api.connection_delete(ssh_connection_name)
         c = guac.models.Connection(
             name=ssh_connection_name,
@@ -58,10 +58,10 @@ def add(
                 username="fedora",
             ),
         )
-        api.connection_add(c.dict(by_alias=True))
+        api.connection_create(c.dict(by_alias=True))
 
     if not api.connection_exists(rdp_connection_name) or recreate_connection:
-        LOG.warning("add rdp connection %s", rdp_connection_name)
+        LOG.warning("create rdp connection %s", rdp_connection_name)
         api.connection_delete(rdp_connection_name)
         c = guac.models.Connection(
             name=rdp_connection_name,
@@ -76,7 +76,7 @@ def add(
                 drive_name="Shared",
             ),
         )
-        api.connection_add(c.dict(by_alias=True))
+        api.connection_create(c.dict(by_alias=True))
 
     api.user_grant_connection(username, ssh_connection_name)
     api.user_grant_connection(username, rdp_connection_name)

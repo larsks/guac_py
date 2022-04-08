@@ -96,7 +96,7 @@ class Guacamole(requests.Session):
         except KeyError:
             pass
 
-    def connection_add(self, connection):
+    def connection_create(self, connection):
         res = self.post(self.endpoints.connection, json=connection)
         return guac.models.Connection(**res.json())
 
@@ -133,7 +133,7 @@ class Guacamole(requests.Session):
             if err.response.status_code != 404:
                 raise
 
-    def user_add(self, username, password=None, fullname=None):
+    def user_create(self, username, password=None, fullname=None):
         # If caller does not provide a password, set it to a long
         # random string. Creating a user with no password will allow
         # password-free login.
@@ -226,7 +226,7 @@ class Guacamole(requests.Session):
         res.raise_for_status()
         return guac.models.UserPermissions(**res.json())
 
-    def group_add(self, groupname):
+    def group_create(self, groupname):
         g = guac.models.Group(groupname=groupname)
         res = self.post(self.endpoints.group, json=g.dict(by_alias=True))
         res.raise_for_status()
